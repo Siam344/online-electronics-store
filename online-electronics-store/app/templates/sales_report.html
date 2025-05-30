@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sales Report</h2>
+<ul>
+    {% for report in reports %}
+    <li>Product ID: {{ report.product_id }}, Qty Sold: {{ report.quantity_sold }}, Total Sales: ${{ report.total_sales }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

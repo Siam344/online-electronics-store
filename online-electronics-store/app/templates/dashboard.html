@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome, {{ name }}!</h2>
+<p>You are logged in as a {{ role }}.</p>
+{% if role == 'owner' %}
+    <a href="{{ url_for('main.sales_report') }}">View Sales Report</a>
+{% endif %}
+{% endblock %}

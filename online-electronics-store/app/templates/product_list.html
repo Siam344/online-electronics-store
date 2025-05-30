@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-3">Product List</h2>
+<form method="GET" action="{{ url_for('main.product_list') }}" class="mb-4 d-flex gap-2">
+    <input type="text" name="q" class="form-control" placeholder="Search for products..." value="{{ request.args.get('q', '') }}">
+    <select name="category" class="form-select" style="max-width: 200px;">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-dark">Filter</button>
+</form>
+
+<div class="row g-3">
+    {% for product in products.items %}
+    <div class="col-12">
+        <div class="card shadow-sm transition" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+            <div class="row g-0 align-items-center">
+                <div class="col-md-2 text-center">
+                    <img src="{{ url_for('static', filename=product.image_url.split('static/')[1]) }}" class="img-fluid p-2" style="max-height: 100px; object-fit: contain;" alt="{{ product.name }}">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="fw-bold">${{ product.price }}</p>
+                    </div>
+                </div>
+                <div class="col-md-2 text-center">
+                    {% if current_user.is_authenticated and current_user.role == 'customer' %}
+                        <a href="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="btn btn-primary mt-3">Add to Cart</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center mt-4">
+        {% if products.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.product_list', page=products.prev_num, q=request.args.get('q', ''), category=request.args.get('category', '')) }}">Previous</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ products.page }} of {{ products.pages }}</span></li>
+        {% if products.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.product_list', page=products.next_num, q=request.args.get('q', ''), category=request.args.get('category', '')) }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}
