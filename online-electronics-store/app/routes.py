@@ -1,19 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from app import db
-from app.models import User, Product, Cart, Order
-from flask import Blueprint, render_template, request
-from app.models import Product
-from app.models import User, Product, Cart, Order, Delivery
-
+from app.models import User, Product, Cart, Order, Delivery, ContactMessage
 
 main = Blueprint('main', __name__)
-
-
-@main.route('/')
-def index():
-    return render_template('index.html')
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
@@ -167,3 +159,43 @@ def process_checkout():
     flash("Order placed successfully!")
     return redirect(url_for('main.index'))  # ✅ This route exists in your code
 
+@main.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        message = ContactMessage(
+            name=request.form['name'],
+            email=request.form['email'],
+            subject=request.form['subject'],
+            message=request.form['message']
+        )
+        db.session.add(message)
+        db.session.commit()
+        flash('Your message has been sent successfully!', 'success')
+        return redirect(url_for('main.contact'))
+    return render_template('contact.html')
+
+@main.route('/')
+def index():
+    # Get featured products (newest products)
+    featured_products = Product.query.order_by(Product.id.desc()).limit(4).all()
+
+    # Get top sellers (most ordered products)
+    top_sellers = db.session.query(Product, db.func.count(Order.id).label('order_count'))\
+    .join(Order)\
+    .group_by(Product.id)\
+    .order_by(db.text('order_count DESC'))\
+    .limit(4)\
+    .all()
+    top_sellers = [product for product, _ in top_sellers]
+
+    return render_template('index.html',
+                           featured_products=featured_products,
+                           top_sellers=top_sellers)
+
+@main.route('/admin/messages')
+@login_required
+def admin_messages():
+    if current_user.role != 'owner':
+        return redirect(url_for('main.dashboard'))
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    return render_template('admin_messages.html', messages=messages)
