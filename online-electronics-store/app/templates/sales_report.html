@@ -6,7 +6,7 @@
 <table class="table table-bordered table-hover mt-3">
   <thead class="table-dark">
     <tr>
-      <th>Product Name (ID)</th>
+      <th>Product Name (#ID)</th>
       <th>Qty Sold</th>
       <th>Total Sales</th>
     </tr>
@@ -14,7 +14,7 @@
   <tbody>
     {% for report in sales_report %}
       <tr>
-        <td>{{ report.name }} ({{ report.product_id }})</td>
+        <td>{{ report.name }} (#{{ report.product_id }})</td>
         <td>{{ report.quantity_sold }}</td>
         <td>${{ report.price * report.quantity_sold }}</td>
       </tr>
