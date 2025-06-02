@@ -1,6 +1,63 @@
-{% extends "base.html" %} {% block content %}
-<div class="text-center">
-  <h1 class="display-4">Welcome to AWE Electronics Store</h1>
-  <p class="lead">Your one-stop shop for electronics online.</p>
+{% extends "base.html" %}
+{% block content %}
+<!-- Hero Banner -->
+<div class="hero-banner mb-5">
+  <img src="{{ url_for('static', filename='Products/banner.jpg') }}" class="w-100" style="height: 400px; object-fit: cover;" alt="AWE Electronics Banner">
+  <div class="position-absolute top-50 start-50 translate-middle text-center text-white">
+    <h1 class="display-4 fw-bold">Welcome to AWE Electronics Store</h1>
+    <p class="lead">Your one-stop shop for electronics online.</p>
+    <a href="{{ url_for('main.product_list') }}" class="btn btn-light btn-lg">Shop Now</a>
+  </div>
 </div>
+
+<!-- Featured Products -->
+<section class="mb-5">
+  <h2 class="text-center mb-4">Featured Products</h2>
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    {% for product in featured_products %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="{{ product.image_url }}" class="card-img-top p-3" style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text text-muted">{{ product.description }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="h5 mb-0">${{ product.price }}</span>
+            {% if current_user.is_authenticated and current_user.role == 'customer' %}
+            <a href="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="btn btn-primary">Add to Cart</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Top Sellers -->
+<section class="mb-5 bg-light py-5">
+  <div class="container">
+    <h2 class="text-center mb-4">Top Sellers</h2>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+      {% for product in top_sellers %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="badge bg-danger position-absolute top-0 end-0 m-2">Top Seller</div>
+          <img src="{{ product.image_url }}" class="card-img-top p-3" style="height: 200px; object-fit: contain;" alt="{{ product.name }}">
+          <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text text-muted">{{ product.description }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="h5 mb-0">${{ product.price }}</span>
+              {% if current_user.is_authenticated and current_user.role == 'customer' %}
+              <a href="{{ url_for('main.add_to_cart', product_id=product.id) }}" class="btn btn-primary">Add to Cart</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 {% endblock %}

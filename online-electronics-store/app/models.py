@@ -1,7 +1,6 @@
 from app import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -39,7 +38,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    transaction_date = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Australia/Sydney")))
+    transaction_date = db.Column(db.DateTime, default=datetime.now())
 
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     product = db.relationship('Product', backref=db.backref('orders', lazy=True))
@@ -55,4 +54,11 @@ class Delivery(db.Model):
     card_number = db.Column(db.String(4)) # card_number will only store the last 4 digits 
     # cvc and exp_date will not be stored in db for best security practices
 
-
+class ContactMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
