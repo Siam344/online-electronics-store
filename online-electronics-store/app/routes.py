@@ -30,7 +30,7 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('main.dashboard'))
+            return redirect(url_for('main.index'))
         flash('Invalid login.', 'danger')
     return render_template('login.html')
 
