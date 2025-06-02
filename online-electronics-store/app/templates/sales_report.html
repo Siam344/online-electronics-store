@@ -1,9 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Sales Report</h2>
-<ul>
-    {% for report in reports %}
-    <li>Product ID: {{ report.product_id }}, Qty Sold: {{ report.quantity_sold }}, Total Sales: ${{ report.total_sales }}</li>
+<p>Period: {{ start_date }} to {{ end_date }}</p>
+<p>Generated on: {{ todays_date }}</p>
+<table class="table table-bordered table-hover mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>Product Name (ID)</th>
+      <th>Qty Sold</th>
+      <th>Total Sales</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for report in sales_report %}
+      <tr>
+        <td>{{ report.name }} ({{ report.product_id }})</td>
+        <td>{{ report.quantity_sold }}</td>
+        <td>${{ report.price * report.quantity_sold }}</td>
+      </tr>
     {% endfor %}
-</ul>
+  </tbody>
+  <tfoot class="fw-bold">
+      <tr>
+        <td>Total</td>
+        <td>{{ total_qty }}</td>
+        <td>${{ total_sales }}</td>
+      </tr>    
+  </tfoot>
+
+</table>
 {% endblock %}

@@ -7,6 +7,7 @@
       <th>Product</th>
       <th>Quantity</th>
       <th>Price</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>
@@ -15,6 +16,9 @@
       <td>{{ item.product.name }}</td>
       <td>{{ item.quantity }}</td>
       <td>${{ item.product.price * item.quantity }}</td>
+      <td><a href="{{ url_for('main.delete_from_cart', product_id=item.product.id) }}" class="btn btn-danger btn-sm"
+        >Remove from Cart</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>

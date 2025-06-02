@@ -5,21 +5,21 @@
     <h4>Delivery Address</h4>
     <div class="mb-3">
       <label for="address" class="form-label">Street Address</label>
-      <input type="text" class="form-control" name="address" required />
+      <input type="text" class="form-control" name="address" maxlength="255" required />
     </div>
     <div class="mb-3">
       <label for="city" class="form-label">City</label>
-      <input type="text" class="form-control" name="city" required />
+      <input type="text" class="form-control" name="city" maxlength="100" pattern="^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$" required />
     </div>
     <div class="mb-3">
       <label for="postal_code" class="form-label">Postal Code</label>
-      <input type="text" class="form-control" name="postal_code" required />
+      <input type="text" class="form-control" name="postal_code" minlength="4" maxlength="4" pattern="^\d*$" required title="Numbers only"/>
     </div>
 
     <h4 class="mt-4">Card Information</h4>
     <div class="mb-3">
       <label for="card_name" class="form-label">Cardholder Name</label>
-      <input type="text" class="form-control" name="card_name" required />
+      <input type="text" class="form-control" name="card_name" maxlength="100" pattern="/^[a-z ,.'-]+$/i" required title="Cannot be blank and no numbers allowed"/>
     </div>
     <div class="mb-3">
       <label for="card_number" class="form-label">Card Number</label>
@@ -27,8 +27,10 @@
         type="text"
         class="form-control"
         name="card_number"
+        minlength="16"
         maxlength="16"
-        required
+        pattern="^\d*$"
+        required title="Numbers only"
       />
     </div>
     <div class="mb-3">
@@ -38,7 +40,8 @@
         class="form-control"
         name="exp_date"
         placeholder="MM/YY"
-        required
+        pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$"
+        required title="Please use the following format MM/YY (Month/Year)"
       />
     </div>
     <div class="mb-3">
@@ -47,8 +50,10 @@
         type="text"
         class="form-control"
         name="cvc"
-        maxlength="4"
-        required
+        minlength="3"
+        maxlength="3"
+        pattern="^\d*$"
+        required title="Numbers only"
       />
     </div>
     <button type="submit" class="btn btn-success">Pay</button>
