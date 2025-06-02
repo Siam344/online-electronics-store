@@ -95,7 +95,7 @@ def sales_report():
             return redirect(url_for('main.admin_dashboard'))
         else:    
             total_qty = sum(sales.quantity_sold for sales in sales_report)
-            total_sales = sum(sales.price for sales in sales_report)
+            total_sales = sum(sales.quantity_sold * sales.price for sales in sales_report)
 
             return render_template(
                 'sales_report.html', 
