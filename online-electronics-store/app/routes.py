@@ -13,12 +13,34 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
-        role = request.form['role']
-        new_user = User(name=name, email=email, password=password, role=role)
+        role = 'customer'
+
+        #  Check for @ and .com
+        if '@' not in email or '.com' not in email:
+            flash('Please enter a valid email address (must include @ and .com)', 'danger')
+            return redirect(url_for('main.register'))
+
+        #  Set admin request only if email ends with @swin.com
+        is_admin_approved = False
+        admin_requested = False
+        if email.endswith('@swin.com'):
+            admin_requested = True
+        else:
+            flash('Only @swin.com users can request admin approval.', 'info')
+
+        new_user = User(
+            name=name,
+            email=email,
+            password=password,
+            role=role,
+            is_admin_approved=is_admin_approved,
+            admin_requested=admin_requested
+        )
         db.session.add(new_user)
         db.session.commit()
         flash('Account created. Please login.', 'success')
         return redirect(url_for('main.login'))
+
     return render_template('register.html')
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -48,10 +70,29 @@ def dashboard():
 @main.route('/admin')
 @login_required
 def admin_dashboard():
-    if current_user.role != 'owner':
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        flash("Access denied: You are not an approved admin.", "danger")
         return redirect(url_for('main.dashboard'))
+
     products = Product.query.all()
-    return render_template('admin_dashboard.html', products=products)
+    unapproved_users = User.query.filter(
+    User.role == 'customer',
+    User.is_admin_approved == False,
+    User.admin_requested == True,
+    User.email.ilike('%@swin.com')
+).all()
+
+    approved_admins = User.query.filter_by(role='owner', is_admin_approved=True).all()
+
+    return render_template(
+        'admin_dashboard.html',
+        products=products,
+        unapproved_users=unapproved_users,
+        approved_admins=approved_admins
+    )
+
+
+
 
 @main.route('/add_product', methods=['GET', 'POST'])
 @login_required
@@ -73,24 +114,32 @@ def add_product():
 def product_list():
     page = request.args.get('page', 1, type=int)
     per_page = 5
-    search = request.args.get('q')
-    selected_category = request.args.get('category')
+    search = request.args.get('q', '').strip()
+    selected_category = request.args.get('category', '').strip()
 
     query = Product.query
 
-    if search:
-        query = query.filter(Product.name.ilike(f'%{search}%'))
-
     if selected_category:
-        query = query.filter_by(category=selected_category)
+        # Category overrides search completely
+        query = query.filter(Product.category == selected_category)
+    elif search:
+        # Only use search if category isn't selected
+        query = query.filter(Product.name.ilike(f"%{search}%"))
 
     products = query.paginate(page=page, per_page=per_page)
 
-    # Get distinct category list
     categories = db.session.query(Product.category).distinct().all()
     categories = [c[0] for c in categories if c[0] is not None]
 
-    return render_template('product_list.html', products=products, categories=categories, selected_category=selected_category)
+    return render_template(
+        'product_list.html',
+        products=products,
+        categories=categories,
+        selected_category=selected_category
+    )
+
+
+
 
 
 @main.route('/add_to_cart/<int:product_id>')
@@ -138,7 +187,7 @@ def process_checkout():
     for item in cart_items:
         order = Order(user_id=current_user.id, product_id=item.product_id, quantity=item.quantity)
         db.session.add(order)
-        db.session.flush()  # 👈 gets order.id before commit
+        db.session.flush()  #  gets order.id before commit
 
         # Save delivery info for this order
         delivery = Delivery(
@@ -157,7 +206,7 @@ def process_checkout():
 
     db.session.commit()
     flash("Order placed successfully!")
-    return redirect(url_for('main.index'))  # ✅ This route exists in your code
+    return redirect(url_for('main.index'))  #  This route exists in your code
 
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -197,5 +246,106 @@ def index():
 def admin_messages():
     if current_user.role != 'owner':
         return redirect(url_for('main.dashboard'))
-    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    messages = ContactMessage.query.filter_by(status='unread').order_by(ContactMessage.created_at.desc()).all()
     return render_template('admin_messages.html', messages=messages)
+@main.route('/approve_admin/<int:user_id>', methods=['POST'])
+@login_required
+def approve_admin(user_id):
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        flash("Unauthorized", "danger")
+        return redirect(url_for('main.dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    user.role = 'owner'
+    user.is_admin_approved = True
+    db.session.commit()
+    flash(f"{user.name} is now an approved admin!", "success")
+    return redirect(url_for('main.admin_dashboard'))
+@main.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def edit_product(product_id):
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        return redirect(url_for('main.dashboard'))
+
+    product = Product.query.get_or_404(product_id)
+
+    if request.method == 'POST':
+        product.name = request.form['name']
+        product.price = float(request.form['price'])
+        product.description = request.form['description']
+        product.image_url = request.form['image_url']
+        db.session.commit()
+        flash('Product updated successfully!', 'success')
+        return redirect(url_for('main.admin_dashboard'))
+
+    return render_template('edit_product.html', product=product)
+
+
+@main.route('/delete_product/<int:product_id>', methods=['POST'])
+@login_required
+def delete_product(product_id):
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        return redirect(url_for('main.dashboard'))
+
+    product = Product.query.get_or_404(product_id)
+    db.session.delete(product)
+    db.session.commit()
+    flash('Product deleted!', 'success')
+    return redirect(url_for('main.admin_dashboard'))
+@main.route('/demote_admin/<int:user_id>', methods=['POST'])
+@login_required
+def demote_admin(user_id):
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        return redirect(url_for('main.dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    user.role = 'customer'
+    user.is_admin_approved = False
+    db.session.commit()
+    flash(f"{user.name} has been demoted to customer.", "warning")
+    return redirect(url_for('main.admin_dashboard'))
+
+@main.route('/update_product/<int:product_id>', methods=['POST'])
+@login_required
+def update_product(product_id):
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        flash("Unauthorized", "danger")
+        return redirect(url_for('main.dashboard'))
+
+    product = Product.query.get_or_404(product_id)
+    product.name = request.form['name']
+    product.price = float(request.form['price'])
+    product.description = request.form['description']
+    db.session.commit()
+
+    flash('Product updated successfully!', 'success')
+    return redirect(url_for('main.admin_dashboard'))
+@main.route('/mark_message_read/<int:message_id>', methods=['POST'])
+@login_required
+def mark_message_read(message_id):
+    if current_user.role != 'owner':
+        return redirect(url_for('main.dashboard'))
+
+    msg = ContactMessage.query.get_or_404(message_id)
+    msg.status = 'read'
+    db.session.commit()
+    flash("Message marked as read.", "info")
+    return redirect(url_for('main.admin_messages'))
+@main.route('/delete_user_request/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user_request(user_id):
+    if current_user.role != 'owner' or not current_user.is_admin_approved:
+        flash("Unauthorized", "danger")
+        return redirect(url_for('main.dashboard'))
+
+    user = User.query.get_or_404(user_id)
+
+    if user.role == 'customer' and not user.is_admin_approved:
+        user.admin_requested = False 
+        db.session.commit()
+        flash(f"Admin request from {user.name} has been removed.", "info")
+    else:
+        flash("This user isn't a pending admin request.", "warning")
+
+    return redirect(url_for('main.admin_dashboard'))
+
