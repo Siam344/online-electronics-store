@@ -13,6 +13,11 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.Text, nullable=False)
     role = db.Column(db.String(10))  # 'customer' or 'owner'
+    is_admin_approved = db.Column(db.Boolean, default=False)
+    admin_requested = db.Column(db.Boolean, default=True)  
+
+
+
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -62,3 +67,5 @@ class ContactMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_read = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(10), default='unread')
+
