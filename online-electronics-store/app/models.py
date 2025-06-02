@@ -65,7 +65,7 @@ class ContactMessage(db.Model):
     email = db.Column(db.String(120), nullable=False)
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now())
     is_read = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(10), default='unread')
 

@@ -206,9 +206,6 @@ def product_list():
     )
 
 
-
-
-
 @main.route('/add_to_cart/<int:product_id>')
 @login_required
 def add_to_cart(product_id):
@@ -292,16 +289,21 @@ def process_checkout():
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        message = ContactMessage(
-            name=request.form['name'],
-            email=request.form['email'],
-            subject=request.form['subject'],
-            message=request.form['message']
-        )
-        db.session.add(message)
-        db.session.commit()
-        flash('Your message has been sent successfully!', 'success')
-        return redirect(url_for('main.contact'))
+        #  Check for @ and .com
+        if '@' not in request.form['email'] or '.com' not in request.form['email']:
+            flash('Please enter a valid email address (must include @ and .com)', 'danger')
+            return redirect(url_for('main.contact'))
+        else: # no issues
+            message = ContactMessage(
+                name=request.form['name'],
+                email=request.form['email'],
+                subject=request.form['subject'],
+                message=request.form['message']
+            )
+            db.session.add(message)
+            db.session.commit()
+            flash('Your message has been sent successfully!', 'success')
+            return redirect(url_for('main.contact'))
     return render_template('contact.html')
 
 @main.route('/')
@@ -329,6 +331,7 @@ def admin_messages():
         return redirect(url_for('main.dashboard'))
     messages = ContactMessage.query.filter_by(status='unread').order_by(ContactMessage.created_at.desc()).all()
     return render_template('admin_messages.html', messages=messages)
+
 @main.route('/approve_admin/<int:user_id>', methods=['POST'])
 @login_required
 def approve_admin(user_id):
@@ -342,6 +345,7 @@ def approve_admin(user_id):
     db.session.commit()
     flash(f"{user.name} is now an approved admin!", "success")
     return redirect(url_for('main.admin_dashboard'))
+
 @main.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
 @login_required
 def edit_product(product_id):
@@ -373,6 +377,7 @@ def delete_product(product_id):
     db.session.commit()
     flash('Product deleted!', 'success')
     return redirect(url_for('main.admin_dashboard'))
+
 @main.route('/demote_admin/<int:user_id>', methods=['POST'])
 @login_required
 def demote_admin(user_id):
@@ -401,6 +406,7 @@ def update_product(product_id):
 
     flash('Product updated successfully!', 'success')
     return redirect(url_for('main.admin_dashboard'))
+
 @main.route('/mark_message_read/<int:message_id>', methods=['POST'])
 @login_required
 def mark_message_read(message_id):
@@ -412,6 +418,7 @@ def mark_message_read(message_id):
     db.session.commit()
     flash("Message marked as read.", "info")
     return redirect(url_for('main.admin_messages'))
+
 @main.route('/delete_user_request/<int:user_id>', methods=['POST'])
 @login_required
 def delete_user_request(user_id):
