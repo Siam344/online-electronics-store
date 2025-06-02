@@ -4,20 +4,16 @@
 <h2>Admin Dashboard</h2>
 <div class="d-flex align-items-center gap-4 flex-wrap">
 <form method="POST" action="{{ url_for('main.sales_report') }}" class="mb-3 d-flex align-items-center gap-4">
-  <label for="start_date" class="form-label mt-2">Start Date:</label>
+  <label for="start_date" class="form-label mt-2 d-flex align-items-center gap-4">Start Date:</label>
   <input type="date" id="start_date" name="start_date" class="form-control" style="max-width: 200px; height: 38px;" required>
 
   <label for="end_date" class="form-label mt-2">End Date:</label>
   <input type="date" id="end_date" name="end_date" class="form-control" style="max-width: 200px; height: 38px;" required>
 
-  <button type="submit" class="btn btn-primary mb-3">Generate Sales Report</button>
+  <button type="submit" class="btn btn-primary btn-sm mb-3">Generate Sales Report</button>
 </form>
-  <a href="{{ url_for('main.add_product') }}" class="btn btn-primary mb-3">Add Product</a>
+  <a href="{{ url_for('main.add_product') }}" class="btn btn-primary btn-sm mb-3">Add Product</a>
 </div>
-
-
-
-<a href="{{ url_for('main.add_product') }}" class="btn btn-primary mb-3">Add Product</a>
 
 <!-- Product Table -->
 <h3>Products</h3>
@@ -28,7 +24,6 @@
       <th>Price</th>
       <th>Description</th>
       <th>Status</th>
-      <th>Action</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -44,15 +39,15 @@
       <td>Inactive</td>
       {% endif %}
       <td>
-        {% if product.is_active %}  
-          <a href="{{ url_for('main.deactivate_product', product_id=product.id) }}" class="btn btn-danger btn-sm"
-           >Deactivate Product
-          </a>
-        {% else %}
-          <a href="{{ url_for('main.activate_product', product_id=product.id) }}" class="btn btn-success btn-sm"
-            >Activate Product
-          </a>
-        {% endif %}
+      {% if product.is_active %}  
+        <a href="{{ url_for('main.deactivate_product', product_id=product.id) }}" class="btn btn-danger btn-sm"
+          >Deactivate
+        </a>
+      {% else %}
+        <a href="{{ url_for('main.activate_product', product_id=product.id) }}" class="btn btn-success btn-sm"
+          >Activate
+        </a>
+      {% endif %}
       </td>
       <form method="POST" action="{{ url_for('main.update_product', product_id=product.id) }}">
         <td>
@@ -65,13 +60,14 @@
           <input type="text" name="description" value="{{ product.description }}" class="form-control" required />
         </td>
         <td class="align-middle">
-          <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success btn-sm w-100">Save</button>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success btn-sm w-100">Save</button>
       </form>
       <form action="{{ url_for('main.delete_product', product_id=product.id) }}" method="POST" onsubmit="return confirm('Delete this product?')" class="w-100">
         <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
       </form>
-          </div>
+
+        </div>
         </td>
     </tr>
     {% endfor %}
