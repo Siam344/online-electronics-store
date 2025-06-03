@@ -10,6 +10,6 @@ with app.app_context():
         user.role = 'owner'
         user.is_admin_approved = True
         db.session.commit()
-        print("✅ Admin approved!")
+        print("Admin approved!")
     else:
-        print("❌ No user found with that email.")
+        print("No user found with that email.")
