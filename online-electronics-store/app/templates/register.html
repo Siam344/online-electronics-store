@@ -3,7 +3,7 @@
 <form method="POST" class="w-50 mx-auto">
   <div class="mb-3">
     <label>Name:</label>
-    <input type="text" name="name" class="form-control" pattern="/^[a-z ,.'-]+$/i" required title ="No numbers allowed" />
+    <input type="text" name="name" class="form-control" pattern="^((?:[A-Za-z]+ ?){1,3})$" required title="Names cannot have numbers in them!" />
   </div>
   <div class="mb-3">
     <label>Email:</label>
@@ -11,7 +11,7 @@
   </div>
   <div class="mb-3">
     <label>Password:</label>
-    <input type="password" name="password" class="form-control" required />
+    <input type="password" name="password" class="form-control" minlength="8" required title="Password must have at least 8 characters!" />
   </div>
   <button type="submit" class="btn btn-success">Register</button>
 </form>

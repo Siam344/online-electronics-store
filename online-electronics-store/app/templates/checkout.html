@@ -9,7 +9,7 @@
     </div>
     <div class="mb-3">
       <label for="city" class="form-label">City</label>
-      <input type="text" class="form-control" name="city" maxlength="100" pattern="^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$" required />
+      <input type="text" class="form-control" name="city" maxlength="100" pattern="^((?:[A-Za-z]+ ?){1,3})$" required title="Please enter a valid city and no numbers allowed!"/>
     </div>
     <div class="mb-3">
       <label for="postal_code" class="form-label">Postal Code</label>
@@ -19,7 +19,7 @@
     <h4 class="mt-4">Card Information</h4>
     <div class="mb-3">
       <label for="card_name" class="form-label">Cardholder Name</label>
-      <input type="text" class="form-control" name="card_name" maxlength="100" pattern="/^[a-z ,.'-]+$/i" required title="Cannot be blank and no numbers allowed"/>
+      <input type="text" class="form-control" name="card_name" maxlength="100" pattern="^((?:[A-Za-z]+ ?){1,3})$"  required title="No numbers allowed in cardholder name!"/>
     </div>
     <div class="mb-3">
       <label for="card_number" class="form-label">Card Number</label>
