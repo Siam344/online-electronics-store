@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Thank you for ordering with us!</h2>
+<p>Please find your following order details below: </p>
+<p>Ordered on: {{ transaction_date }}</p>
+<table class="table table-bordered table-hover mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>Product Name</th>
+      <th>Quantity</th>
+      <th>Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in order_details %}
+      <tr>
+        <td>{{ order.product.name }}</td>
+        <td>{{ order.quantity }}</td>
+        <td>${{ order.product.price * order.quantity }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot class="fw-bold">
+      <tr>
+        <td>Total</td>
+        <td>{{ total_qty }}</td>
+        <td>${{ total_price }}</td>
+      </tr>    
+  </tfoot>
+
+</table>
+{% endblock %}

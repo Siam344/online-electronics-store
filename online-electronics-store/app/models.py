@@ -26,6 +26,7 @@ class Product(db.Model):
     description = db.Column(db.String(255))
     image_url = db.Column(db.String(255))
     category = db.Column(db.String(50))
+    is_active = db.Column(db.Boolean, default=True) # removing products will result in false 
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,6 +43,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+    transaction_date = db.Column(db.DateTime, default=datetime.now())
 
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     product = db.relationship('Product', backref=db.backref('orders', lazy=True))
@@ -52,11 +54,10 @@ class Delivery(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
     address = db.Column(db.String(255))
     city = db.Column(db.String(100))
-    postal_code = db.Column(db.String(20))
+    postal_code = db.Column(db.String(4))
     card_name = db.Column(db.String(100))
-    card_number = db.Column(db.String(100))
-    exp_date = db.Column(db.String(10))
-    cvc = db.Column(db.String(10))
+    card_number = db.Column(db.String(4)) # card_number will only store the last 4 digits 
+    # cvc and exp_date will not be stored in db for best security practices
 
 class ContactMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,7 +65,7 @@ class ContactMessage(db.Model):
     email = db.Column(db.String(120), nullable=False)
     subject = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now())
     is_read = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(10), default='unread')
 

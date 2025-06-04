@@ -180,4 +180,4 @@ with app.app_context():
     db.session.bulk_save_objects(products)
     db.session.commit()
 
-    print("✅ All 22 products with correct images and categories added successfully.")
+    print("All 22 products with correct images and categories added successfully.")
